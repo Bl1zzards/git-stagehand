@@ -1,0 +1,77 @@
+{
+    "name": "git-stagehand",
+    "displayName": "Git Stagehand",
+    "description": "Show staged and unstaged git file and line change counts in the status bar at all times.",
+    "version": "0.0.1",
+    "publisher": "local",
+    "author": {
+        "name": "Diogo Gomes",
+        "email": "diogo@gomes-web.dev",
+        "url": "https://github.com/Bl1zzards/git-stagehand"
+    },
+    "license": "MIT",
+    "icon": "img/icon.png",
+    "repository": {
+        "type": "git",
+        "url": "https://github.com/Bl1zzards/git-stagehand.git"
+    },
+    "homepage": "https://github.com/Bl1zzards/git-stagehand#readme",
+    "bugs": {
+        "url": "https://github.com/Bl1zzards/git-stagehand/issues"
+    },
+    "engines": {
+        "vscode": "^1.75.0"
+    },
+    "categories": [
+        "Other"
+    ],
+    "keywords": [
+        "git",
+        "status bar",
+        "diff",
+        "staged"
+    ],
+    "activationEvents": [
+        "onStartupFinished"
+    ],
+    "main": "./out/extension.js",
+    "contributes": {
+        "commands": [
+            {
+                "command": "gitStagehand.refresh",
+                "title": "Git Stagehand: Refresh Counts"
+            }
+        ],
+        "configuration": {
+            "title": "Git Stagehand",
+            "properties": {
+                "gitStagehand.enabled": {
+                    "type": "boolean",
+                    "default": true,
+                    "description": "Show the Git Stagehand status bar item."
+                },
+                "gitStagehand.pollInterval": {
+                    "type": "number",
+                    "default": 5000,
+                    "minimum": 0,
+                    "description": "How often, in milliseconds, to re-read git state. Set to 0 to disable polling (refresh on save/focus/git changes only)."
+                },
+                "gitStagehand.hideWhenClean": {
+                    "type": "boolean",
+                    "default": false,
+                    "description": "Hide the status bar item when there are no staged or unstaged changes."
+                }
+            }
+        }
+    },
+    "scripts": {
+        "vscode:prepublish": "npm run compile",
+        "compile": "tsc -p ./",
+        "watch": "tsc -watch -p ./"
+    },
+    "devDependencies": {
+        "@types/node": "^20.11.0",
+        "@types/vscode": "^1.75.0",
+        "typescript": "^5.4.0"
+    }
+}
