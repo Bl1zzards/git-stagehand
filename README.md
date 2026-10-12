@@ -3,7 +3,7 @@
 A tiny VS Code extension that shows staged and unstaged git file and line change
 counts in the status bar at all times.
 
-![Git Stagehand status bar](img/screenshot-footer.png)
+![Git Stagehand status bar](https://raw.githubusercontent.com/Bl1zzards/git-stagehand/refs/heads/main/img/screenshot-footer.png)
 
 - Two color-coded items: staged in white and unstaged in yellow.
 - Each item shows a file count with added and removed line totals.
@@ -49,3 +49,12 @@ npm run compile
 ```
 
 Press `F5` to open an Extension Development Host with the status bar visible.
+
+## Credits
+
+The extension icon combines two MIT-licensed icons:
+
+- git icon from [vscode-icons](https://github.com/vscode-icons/vscode-icons)
+- hand icon from [Phosphor Icons](https://github.com/phosphor-icons/phosphor-icons)
+
+See [THIRD-PARTY-NOTICES.md](THIRD-PARTY-NOTICES.md) for the full license texts.
