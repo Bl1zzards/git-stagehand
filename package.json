@@ -2,7 +2,7 @@
     "name": "git-stagehand",
     "displayName": "Git Stagehand",
     "description": "Show staged and unstaged git file and line change counts in the status bar at all times.",
-    "version": "0.0.1",
+    "version": "0.0.2",
     "publisher": "local",
     "author": {
         "name": "Diogo Gomes",
