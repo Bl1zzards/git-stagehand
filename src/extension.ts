@@ -35,12 +35,13 @@ function run(cmd: string, args: string[], cwd: string): Promise<string> {
 }
 
 /**
- * Checks if the given folder is a Git repository.
+ * Resolves the root of the Git work tree containing the given folder.
+ * Returns `undefined` if the folder is not inside a Git work tree.
  */
-function isGitRepo(folder: string): Promise<boolean> {
-    return run('git', ['rev-parse', '--is-inside-work-tree'], folder)
-        .then((out) => out.trim() === 'true')
-        .catch(() => false);
+function gitRoot(folder: string): Promise<string | undefined> {
+    return run('git', ['rev-parse', '--show-toplevel'], folder)
+        .then((out) => out.trim() || undefined)
+        .catch(() => undefined);
 }
 
 /**
@@ -69,22 +70,17 @@ function parseNumstat(stdout: string): Counts {
     return counts;
 }
 
-/** 
- * Collects the Git status counts for the given workspace folder.
- * Returns `undefined` if the folder is not a Git repository.
+/**
+ * Collects the Git status counts for the repository at the given root.
  */
-async function collectRepo(folder: vscode.WorkspaceFolder): Promise<RepoCounts | undefined> {
-    if (!(await isGitRepo(folder.uri.fsPath))) {
-        return undefined;
-    }
-
+async function collectRepo(name: string, root: string): Promise<RepoCounts> {
     const [stagedOut, unstagedOut] = await Promise.all([
-        run('git', ['diff', '--cached', '--numstat'], folder.uri.fsPath).catch(() => ''),
-        run('git', ['diff', '--numstat'], folder.uri.fsPath).catch(() => '')
+        run('git', ['diff', '--cached', '--numstat'], root).catch(() => ''),
+        run('git', ['diff', '--numstat'], root).catch(() => '')
     ]);
 
     return {
-        name: folder.name,
+        name,
         staged: parseNumstat(stagedOut),
         unstaged: parseNumstat(unstagedOut)
     };
@@ -184,9 +180,16 @@ async function refresh(): Promise<void> {
             return;
         }
 
-        const repos = (await Promise.all(folders.map(collectRepo))).filter(
-            (r): r is RepoCounts => r !== undefined
-        );
+        // Several workspace folders can live in the same repository; count each repository once.
+        const roots = await Promise.all(folders.map((f) => gitRoot(f.uri.fsPath)));
+        const repoNames = new Map<string, string>();
+        roots.forEach((root, i) => {
+            if (root && !repoNames.has(root)) {
+                repoNames.set(root, folders[i].name);
+            }
+        });
+
+        const repos = await Promise.all([...repoNames].map(([root, name]) => collectRepo(name, root)));
 
         if (token !== refreshToken) {
             return;
