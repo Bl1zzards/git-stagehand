@@ -35,12 +35,13 @@ function run(cmd: string, args: string[], cwd: string): Promise<string> {
 }
 
 /**
- * Checks if the given folder is a Git repository.
+ * Resolves the root of the Git work tree containing the given folder.
+ * Returns `undefined` if the folder is not inside a Git work tree.
  */
-function isGitRepo(folder: string): Promise<boolean> {
-    return run('git', ['rev-parse', '--is-inside-work-tree'], folder)
-        .then((out) => out.trim() === 'true')
-        .catch(() => false);
+function getGitRoot(folder: string): Promise<string | undefined> {
+    return run('git', ['rev-parse', '--show-toplevel'], folder)
+        .then((out) => out.trim() || undefined)
+        .catch(() => undefined);
 }
 
 /**
@@ -74,13 +75,14 @@ function parseNumstat(stdout: string): Counts {
  * Returns `undefined` if the folder is not a Git repository.
  */
 async function collectRepo(folder: vscode.WorkspaceFolder): Promise<RepoCounts | undefined> {
-    if (!(await isGitRepo(folder.uri.fsPath))) {
+    const root = await getGitRoot(folder.uri.fsPath);
+    if (!root) {
         return undefined;
     }
-
+    
     const [stagedOut, unstagedOut] = await Promise.all([
-        run('git', ['diff', '--cached', '--numstat'], folder.uri.fsPath).catch(() => ''),
-        run('git', ['diff', '--numstat'], folder.uri.fsPath).catch(() => '')
+        run('git', ['diff', '--cached', '--numstat'], root).catch(() => ''),
+        run('git', ['diff', '--numstat'], root).catch(() => '')
     ]);
 
     return {
